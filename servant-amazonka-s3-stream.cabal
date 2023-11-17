@@ -1,0 +1,32 @@
+cabal-version:   3.0
+name:            servant-amazonka-s3-stream
+version:         0.1.0.0
+license:         BSD-3-Clause
+license-file:    LICENSE
+author:          Jan Hrček
+maintainer:      honza.hrk@gmail.com
+category:        Web
+build-type:      Simple
+extra-doc-files: CHANGELOG.md
+
+common warnings
+  ghc-options: -Wall
+
+executable servant-amazonka-s3-stream
+  import:           warnings
+  main-is:          Main.hs
+  build-depends:
+    , amazonka         >=2.0       && <2.1
+    , amazonka-s3      >=2.0       && <2.1
+    , base             ^>=4.17.2.0
+    , bytestring       >=0.11.5    && <0.12
+    , conduit          >=1.3.5     && <1.4
+    , lens             >=5.2.3     && <5.3
+    , resourcet        >=1.3.0     && <1.4
+    , servant          >=0.20.1    && <0.21
+    , servant-conduit  >=0.16      && <0.17
+    , servant-server   >=0.20      && <0.21
+    , warp             >=3.3.30    && <3.4
+
+  hs-source-dirs:   app
+  default-language: Haskell2010
