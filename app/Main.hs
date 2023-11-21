@@ -11,7 +11,7 @@ import Amazonka.S3.GetObject (GetObject, GetObjectResponse, getObjectResponse_bo
 import Conduit (ConduitM)
 import Control.Lens (view, (<&>))
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.Resource (ResourceT, closeInternalState, createInternalState, runInternalState)
+import Control.Monad.Trans.Resource (ResourceT)
 import Data.ByteString (ByteString)
 import Network.Wai.Handler.Warp (run)
 import Servant
@@ -20,8 +20,8 @@ import System.IO (stdout)
 
 type API = "getfile" :> StreamGet NoFraming OctetStream (SourceIO ByteString)
 
-server :: Handler (SourceIO ByteString)
-server = liftIO $ do
+server :: ResourceT IO (SourceIO ByteString)
+server = do
     let reg = NorthVirginia
         bucketName = BucketName "pi-staging-artifact"
         objectKey = ObjectKey "2697001/file.csv"
@@ -47,19 +47,20 @@ server = liftIO $ do
     -- \* Closing connection 0
     -- curl: (52) Empty reply from server
 
-    -- runResourceT $ do
-    --   resp <- send env req
-    --   pure $ toSourceIO $ respBodyConduit resp
+    resp <- send env req
+    pure $ toSourceIO $ respBodyConduit resp
 
-    st <- createInternalState
-    resp <- runInternalState (send env req) st
-    pure $ toSourceIO (respBodyConduit resp >> closeInternalState st)
+-- st <- createInternalState
+-- resp <- runInternalState (send env req) st
+-- pure $ toSourceIO (respBodyConduit resp >> closeInternalState st)
 
 api :: Proxy API
 api = Proxy
 
 app :: Application
-app = serve api server
+app =
+    serve api $
+        hoistServer api (liftIO . runResourceT) server
 
 main :: IO ()
 main = do
